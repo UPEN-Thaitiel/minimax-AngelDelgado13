@@ -3,84 +3,131 @@ REWARD = 10
 
 class TicTacToe:
     def __init__(self, board):
-        # Challenge 1: Initialize the board as a dictionary with keys 1-9 all set to ' '
-        # Set player symbol to 'O' and computer symbol to 'X'
+        # Challenge 1
         self.board = board
         self.player = 'O'
         self.computer = 'X'
 
     def run(self):
-        # Challenge 11: Create the main game loop
-        # - Computer starts first
-        # - Alternate between computer and player moves
-        # - After each move, check if the game has ended (win or draw)
-        # - If game ended, exit the loop and print result
-        pass
+        # Challenge 11
+        print("¡Bienvenido al juego Tic-Tac-Toe!")
+        self.move_computer()  # La computadora inicia
+
+        while True:
+            self.move_player()
+            self.move_computer()
 
     def print_board(self):
-        # Challenge 2: Print the board in 3 rows and 3 columns
-        # For example:
-        # X | O |  
-        # --+---+--
-        #   | X | O
-        # --+---+--
-        # O |   | X
-        pass
+        # Challenge 2
+        for i in range(1, 10, 3):
+            print(f" {self.board[i]} | {self.board[i+1]} | {self.board[i+2]} ")
+            if i < 7:
+                print("---+---+---")
 
     def is_cell_free(self, position):
-        # Challenge 3: Return True if the cell at 'position' is empty (' ')
-        # Otherwise, return False
-        pass
+        # Challenge 3
+        return self.board[position] == ' '
 
     def update_player_position(self, player, position):
-        # Challenge 4: If the cell at 'position' is free, place 'player' symbol there
-        # If the cell is occupied, print an error and ask the player to input again
-        # After updating the board, check if the game ended (win or draw)
-        pass
+        # Challenge 4
+        if self.is_cell_free(position):
+            self.board[position] = player
+            self.check_game_state()
+        else:
+            if player == self.player:
+                print("Celda ocupada. Intenta de nuevo.")
+                self.move_player()  # Intenta otra vez
 
     def is_winning(self, player):
-        # Challenge 5: Check if 'player' has 3 in a row horizontally, vertically, or diagonally
-        # Return True if winning condition met, False otherwise
-        pass
+        # Challenge 5
+        wins = [
+            [1, 2, 3], [4, 5, 6], [7, 8, 9],    # filas
+            [1, 4, 7], [2, 5, 8], [3, 6, 9],    # columnas
+            [1, 5, 9], [3, 5, 7]                # diagonales
+        ]
+        return any(all(self.board[pos] == player for pos in combo) for combo in wins)
 
     def is_draw(self):
-        # Challenge 6: Return True if no empty cells remain on the board (all positions filled)
-        # and no player has won
-        pass
+        # Challenge 6
+        return all(self.board[pos] != ' ' for pos in self.board)
 
     def check_game_state(self):
-        # Challenge 7: Print the board and check if the game ended
-        # If player or computer won, print the winner and exit
-        # If draw, print 'Draw!' and exit
-        pass
+        # Challenge 7
+        self.print_board()
+        if self.is_winning(self.player):
+            print("¡Ganaste!")
+            exit()
+        elif self.is_winning(self.computer):
+            print("La computadora gana.")
+            exit()
+        elif self.is_draw():
+            print("¡Empate!")
+            exit()
 
     def move_player(self):
-        # Challenge 8: Ask the human player to enter a position (1-9)
-        # Validate input is an integer within range and the cell is free
-        # Update the board with player's move
-        pass
+        # Challenge 8
+        while True:
+            try:
+                position = int(input("Tu turno (1-9): "))
+                if 1 <= position <= 9:
+                    if self.is_cell_free(position):
+                        break
+                    else:
+                        print("La celda ya está ocupada.")
+                else:
+                    print("Debes ingresar un número del 1 al 9.")
+            except ValueError:
+                print("Entrada inválida. Ingresa un número del 1 al 9.")
+        self.update_player_position(self.player, position)
 
     def move_computer(self):
-        # Challenge 9: Iterate over all free cells on the board
-        # For each cell, simulate placing computer's symbol and calculate minimax score
-        # Choose the cell with the highest minimax score and place the computer's symbol there
-        # After the move, check if the game ended
-        pass
+        # Challenge 9
+        best_score = float('-inf')
+        best_move = None
+        for pos in self.board:
+            if self.is_cell_free(pos):
+                self.board[pos] = self.computer
+                score = self.minimax(0, False)
+                self.board[pos] = ' '
+                if score > best_score:
+                    best_score = score
+                    best_move = pos
+        self.update_player_position(self.computer, best_move)
 
     def minimax(self, depth, is_maximizer):
-        # Challenge 10: Implement recursive minimax algorithm:
-        # - If computer wins, return positive score (REWARD - depth)
-        # - If player wins, return negative score (-REWARD + depth)
-        # - If draw, return 0
-        # - If maximizing (computer's turn), try to maximize score over all possible moves
-        # - If minimizing (player's turn), try to minimize score over all possible moves
-        pass
+        # Challenge 10
+        if self.is_winning(self.computer):
+            return REWARD - depth
+        if self.is_winning(self.player):
+            return -REWARD + depth
+        if self.is_draw():
+            return 0
+
+        if is_maximizer:
+            best_score = float('-inf')
+            for pos in self.board:
+                if self.is_cell_free(pos):
+                    self.board[pos] = self.computer
+                    score = self.minimax(depth + 1, False)
+                    self.board[pos] = ' '
+                    best_score = max(best_score, score)
+            return best_score
+        else:
+            best_score = float('inf')
+            for pos in self.board:
+                if self.is_cell_free(pos):
+                    self.board[pos] = self.player
+                    score = self.minimax(depth + 1, True)
+                    self.board[pos] = ' '
+                    best_score = min(best_score, score)
+            return best_score
 
 
 if __name__ == '__main__':
-    # Challenge 1: Initialize empty board dictionary with keys 1 to 9 set to ' '
+    # Challenge 1
     board = {pos: ' ' for pos in range(1, 10)}
 
     game = TicTacToe(board)
-    # Challenge 11: Start the game loop
+
+    # Challenge 11
     game.run()
